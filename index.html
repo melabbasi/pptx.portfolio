@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PowerPoint Portfolio | Mohamed El-Abbasi</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--muted:#a8b3c2;--accent:#0ea5a4}
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071029 0%, #061223 100%);color:#e6eef6}
+    .container{max-width:1100px;margin:36px auto;padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    h1{margin:0;font-size:22px}
+    p.lead{margin:6px 0 0;color:var(--muted)}
+
+    .controls{display:flex;gap:8px;align-items:center}
+    .search{padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:20px}
+
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:8px}
+    .thumb{height:160px;border-radius:8px;background:#06202a;background-size:cover;background-position:center}
+    .meta{display:flex;justify-content:space-between;align-items:center}
+    .title{font-weight:600}
+    .desc{color:var(--muted);font-size:13px}
+    .tags{display:flex;gap:6px;flex-wrap:wrap}
+    .tag{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted)}
+    .buttons{display:flex;gap:8px;margin-top:auto}
+    .btn{padding:8px 10px;border-radius:8px;border:0;cursor:pointer;background:rgba(255,255,255,0.03);color:inherit}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#06b6d4);color:#042024}
+
+    footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
+
+    .modal-backdrop{position:fixed;inset:0;display:none;place-items:center;background:rgba(2,6,23,0.6);z-index:40}
+    .modal{width:95%;max-width:980px;background:#021018;border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.03)}
+    .modal iframe{width:100%;height:560px;border-radius:6px;border:0;background:white}
+    .modal .close{float:right}
+
+    @media (max-width:600px){.thumb{height:130px}}
+  </style>
+</head>
+<body dir="rtl">
+  <div class="container">
+    <header>
+    	<h1>PowerPoint Projects</h1>
+    	<p>by Mohamed El-Abbasi</p>
+      <div class="controls">
+        <input class="search" id="search" placeholder="ابحث بعنوان أو وسم..." />
+      </div>
+    </header>
+
+    <main>
+      <div class="grid" id="grid"></div>
+    </main>
+
+    <footer>
+      <code>All copyrights reserved for El-Abbasi</code>
+    </footer>
+  </div>
+
+  <div id="backdrop" class="modal-backdrop" role="dialog" aria-hidden="true">
+    <div class="modal" role="document">
+      <button class="close btn" id="closeModal">إغلاق</button>
+      <div id="previewArea"></div>
+    </div>
+  </div>
+
+  <script>
+    const username = 'melabbasi'
+    const repo = 'pptx.portfolio'
+
+    const projects = [
+      {
+        id: 'proj1',
+        title: 'Firtilization and cleavage',
+        description: 'أول مشروع في الكلية، تم عرضه في مدرج قسم التشريح.',
+        thumbnail: 'images/Firtilization and cleavage.png',
+        embedLink: 'https://medtantaedu-my.sharepoint.com/personal/ug_31233194_med_tanta_edu_eg/_layouts/15/Doc.aspx?sourcedoc={341148d8-07eb-4c5d-a995-8e58b8a26cf7}&amp;action=embedview&amp;wdAr=1.7777777777777777',
+        pptxPath: 'files/Firtilization and cleavage.ppsx',
+        tags: ['Medicine', 'Embeyology', 'FMTU', 'SEM1']
+      },
+      {
+        id: 'proj2',
+        title: 'عرض تعليمي',
+        description: 'تصميم تعليمي قابل للتعديل.',
+        thumbnail: 'images/thumb2.jpg',
+        embedLink: 'https://onedrive.live.com/embed?resid=ZZZZZ&authkey=WWWW&em=2',
+        pptxPath: 'files/sample2.pptx',
+        tags: ['تعليم', 'قالب']
+      }
+    ]
+
+    function rawLink(path){
+      return `https://raw.githubusercontent.com/${username}/${repo}/main/${path}`
+    }
+    function githubFileLink(path){
+      return `https://github.com/${username}/${repo}/blob/main/${path}`
+    }
+
+    const grid = document.getElementById('grid')
+
+    function render(){
+      grid.innerHTML = ''
+      const q = document.getElementById('search').value.trim().toLowerCase()
+      const filtered = projects.filter(p => (p.title + ' ' + p.description + ' ' + (p.tags||[]).join(' ')).toLowerCase().includes(q))
+      if(filtered.length===0){ grid.innerHTML = '<p style="color:var(--muted)">لا توجد نتائج.</p>'; return }
+
+      filtered.forEach(p => {
+        const card = document.createElement('article'); card.className='card'
+        card.innerHTML = `
+          <div class="thumb" style="background-image:url('${p.thumbnail}')" aria-hidden="true"></div>
+          <div class="meta"><div class="title">${p.title}</div><div class="tags">${(p.tags||[]).map(t=>`<span class=\"tag\">${t}</span>`).join('')}</div></div>
+          <div class="desc">${p.description}</div>
+          <div class="buttons">
+            <button class="btn" data-action="preview" data-id="${p.id}">معاينة</button>
+            <a class="btn" href="${rawLink(p.pptxPath)}" download>تحميل</a>
+            <a class="btn" href="${githubFileLink(p.pptxPath)}" target="_blank">على GitHub</a>
+          </div>
+        `
+        grid.appendChild(card)
+
+        card.querySelector('[data-action="preview"]').addEventListener('click', ()=>openPreview(p))
+      })
+    }
+
+    function openPreview(p){
+      const previewArea = document.getElementById('previewArea')
+      previewArea.innerHTML = `
+        <h3 style=\"margin-top:0\">${p.title}</h3>
+        <p style=\"color:var(--muted)\">${p.description}</p>
+        <iframe src=\"${p.embedLink}\" allowfullscreen></iframe>
+        <p style=\"margin:8px 0 0\">إذا لم تعمل المعاينة، <a href=\"${rawLink(p.pptxPath)}\" target=\"_blank\">اضغط هنا للتحميل</a>.</p>
+      `
+      const backdrop = document.getElementById('backdrop')
+      backdrop.style.display='grid'
+      backdrop.setAttribute('aria-hidden','false')
+    }
+
+    document.getElementById('closeModal').addEventListener('click', closeModal)
+    document.getElementById('backdrop').addEventListener('click', (e)=>{ if(e.target.id==='backdrop') closeModal() })
+    function closeModal(){ document.getElementById('backdrop').style.display='none'; document.getElementById('backdrop').setAttribute('aria-hidden','true'); document.getElementById('previewArea').innerHTML='' }
+
+    document.getElementById('search').addEventListener('input', render)
+    render()
+  </script>
+</body>
+</html>
